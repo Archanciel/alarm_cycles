@@ -6,7 +6,7 @@ class DateTimeParser {
   static DateFormat englishDateTimeFormatWithSec =
       DateFormat("yyyy-MM-dd HH:mm:ss");
   static DateFormat frenchDateTimeFormat = DateFormat("dd-MM-yyyy HH:mm");
-  static DateFormat HHmmDateTimeFormat = DateFormat("HH:mm");
+  static DateFormat hhmmDateTimeFormat = DateFormat("HH:mm");
 
   /// Examples: kFontSize21-01-01T10:35 --> kFontSize21-01-01T11:00
   ///           kFontSize21-01-01T10:25 --> kFontSize21-01-01T10:00
@@ -198,7 +198,7 @@ class DateTimeParser {
     if (isNextAlarmDateAfterToday) {
       return frenchDateTimeFormat.format(dateTime);
     } else {
-      return HHmmDateTimeFormat.format(dateTime);
+      return hhmmDateTimeFormat.format(dateTime);
     }
   }
 
@@ -212,7 +212,7 @@ class DateTimeParser {
 
     // Try parsing with the "HH:mm" format
     try {
-      parsedDate = HHmmDateTimeFormat.parseStrict(dateTimeStr);
+      parsedDate = hhmmDateTimeFormat.parseStrict(dateTimeStr);
     } catch (e) {
       // If parsing with "HH:mm" fails, try "dd-MM-yyyy HH:mm"
       try {

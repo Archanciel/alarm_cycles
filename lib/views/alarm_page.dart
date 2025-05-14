@@ -182,7 +182,7 @@ class _AlarmPageState extends State<AlarmPage> with ScreenMixin {
   Future<Alarm?> _showAddAlarmDialog(BuildContext context) async {
     TextEditingController nameController = TextEditingController();
     TextEditingController timeController = TextEditingController(
-        text: DateTimeParser.HHmmDateTimeFormat.format(
+        text: DateTimeParser.hhmmDateTimeFormat.format(
             DateTimeParser.truncateDateTimeToMinute(DateTime.now())));
     TextEditingController durationController = TextEditingController();
 

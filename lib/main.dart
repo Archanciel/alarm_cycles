@@ -19,9 +19,9 @@ void onStart(ServiceInstance service) {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   PermissionRequesterService.requestMultiplePermissions();
-  
+
   // Initialiser le service en arrière-plan
   await initializeService();
 
@@ -31,7 +31,7 @@ Future<void> main() async {
       isTest: false,
     );
   }
-  
+
   runApp(ChangeNotifierProvider(
     create: (context) => AlarmVM(),
     child: const MyApp(),
@@ -59,7 +59,7 @@ Future<void> initializeService() async {
       onBackground: AlarmVM.onIosBackground,
     ),
   );
-  
+
   // Démarrer le service
   service.startService();
 }
@@ -82,7 +82,7 @@ Future<void> _setWindowsAppSizeAndPosition({
       // Optionnellement, ajustez la position Y selon vos préférences
       final double posY = (screenRect.height - windowHeight) / 2;
       final Rect windowRect =
-          Rect.fromLTWH(posX, posY, windowWidth, windowHeight);
+      Rect.fromLTWH(posX, posY, windowWidth, windowHeight);
       setWindowFrame(windowRect);
     });
   }
@@ -92,7 +92,7 @@ class MyApp extends StatelessWidget {
   const MyApp({
     super.key,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

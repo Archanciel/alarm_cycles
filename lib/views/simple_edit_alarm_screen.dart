@@ -42,7 +42,7 @@ class _SimpleEditAlarmScreenState extends State<SimpleEditAlarmScreen> with Scre
     TextEditingController nameController =
         TextEditingController(text: _alarm.name);
     TextEditingController timeController = TextEditingController(
-        text: DateTimeParser.HHmmDateTimeFormat.format(_alarm.nextAlarmTime));
+        text: DateTimeParser.hhmmDateTimeFormat.format(_alarm.nextAlarmTime));
     TextEditingController durationController = TextEditingController(
         text:
             "${_alarm.periodicDuration.inHours.toString().padLeft(2, '0')}:${(_alarm.periodicDuration.inMinutes % 60).toString().padLeft(2, '0')}");
