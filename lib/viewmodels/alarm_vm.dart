@@ -3,12 +3,15 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:alarm_cycle/constant.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../models/alarm.dart';
+import '../views/simple_edit_alarm_screen.dart';
 
 class AudioPlayerVM extends ChangeNotifier {
   /// Play an audio file located in the assets folder.
@@ -104,6 +107,7 @@ class AlarmVM with ChangeNotifier {
     
     // Initial notification setup for Android
     if (service is AndroidServiceInstance) {
+      // Set foreground notification info
       service.setForegroundNotificationInfo(
         title: "Alarm Manager",
         content: "Service running in background",

@@ -19,9 +19,9 @@ void onStart(ServiceInstance service) {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   PermissionRequesterService.requestMultiplePermissions();
-  
+
   // Initialiser le service en arrière-plan
   await initializeService();
 
@@ -31,7 +31,7 @@ Future<void> main() async {
       isTest: false,
     );
   }
-  
+
   runApp(ChangeNotifierProvider(
     create: (context) => AlarmVM(),
     child: const MyApp(),
@@ -42,24 +42,53 @@ Future<void> main() async {
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
 
-  // Configuration du service
-  await service.configure(
-    androidConfiguration: AndroidConfiguration(
-      onStart: onStart,
-      autoStart: true,
-      isForegroundMode: true,
-      notificationChannelId: 'alarm_notif',
-      initialNotificationTitle: 'Alarm Service Running',
-      initialNotificationContent: 'Alarm service is active',
-      foregroundServiceNotificationId: 888,
-    ),
-    iosConfiguration: IosConfiguration(
-      autoStart: true,
-      onForeground: onStart,
-      onBackground: AlarmVM.onIosBackground,
-    ),
-  );
-  
+  // Créer un canal de notification
+  // Cette partie est importante pour Android 8.0+
+  if (Platform.isAndroid) {
+    try {
+      // S'assurer que le canal est créé avant de lancer le service
+      final AndroidServiceInstance androidService = await service.configure(
+        androidConfiguration: AndroidConfiguration(
+          onStart: onStart,
+          autoStart: true,
+          isForegroundMode: true,
+          notificationChannelId:
+              'alarm_cycles_channel', // ID unique pour le canal
+          initialNotificationTitle: 'Alarm Service',
+          initialNotificationContent: 'Service is running',
+          foregroundServiceNotificationId: 888,
+        ),
+        iosConfiguration: IosConfiguration(
+          autoStart: true,
+          onForeground: onStart,
+          onBackground: AlarmVM.onIosBackground,
+        ),
+      ) as AndroidServiceInstance;
+
+      print("Service configured successfully");
+    } catch (e) {
+      print("Error configuring service: $e");
+    }
+  } else {
+    // Configuration pour iOS ou autres plateformes
+    await service.configure(
+      androidConfiguration: AndroidConfiguration(
+        onStart: onStart,
+        autoStart: true,
+        isForegroundMode: true,
+        notificationChannelId: 'alarm_cycles_channel',
+        initialNotificationTitle: 'Alarm Service',
+        initialNotificationContent: 'Service is running',
+        foregroundServiceNotificationId: 888,
+      ),
+      iosConfiguration: IosConfiguration(
+        autoStart: true,
+        onForeground: onStart,
+        onBackground: AlarmVM.onIosBackground,
+      ),
+    );
+  }
+
   // Démarrer le service
   service.startService();
 }
@@ -88,7 +117,7 @@ class MyApp extends StatelessWidget {
   const MyApp({
     super.key,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
