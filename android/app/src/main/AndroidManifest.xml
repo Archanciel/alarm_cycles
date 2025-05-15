@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <application
         android:label="alarm_cycles"
         android:name="${applicationName}"
@@ -36,12 +37,13 @@
             android:exported="false"
             android:stopWithTask="false"/> -->
 
-        <!-- Spécifiez le type de service en premier plan -->
+        <!-- Spécifiez le type de service en premier plan avec tools:replace pour résoudre le conflit -->
         <service
             android:name="id.flutter.flutter_background_service.BackgroundService"
             android:foregroundServiceType="mediaPlayback"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            tools:replace="android:exported" />
 
         </application>
     <!-- Required to query activities that can process text, see:
