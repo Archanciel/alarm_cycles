@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
-import 'dart:ui';
 
+import 'package:alarm_cycle/constant.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../models/alarm.dart';
+import '../views/simple_edit_alarm_screen.dart';
 
 class AudioPlayerVM extends ChangeNotifier {
   /// Play an audio file located in the assets folder.
@@ -74,79 +74,6 @@ class AlarmVM with ChangeNotifier {
     _loadAlarms();
   }
 
-  // iOS background handler
-  @pragma('vm:entry-point')
-  static Future<bool> onIosBackground(ServiceInstance service) async {
-    WidgetsFlutterBinding.ensureInitialized();
-    DartPluginRegistrant.ensureInitialized();
-    
-    // Access the AlarmVM singleton
-    final alarmVM = AlarmVM();
-    
-    // Check alarms
-    await alarmVM.checkAlarms();
-    
-    return true;
-  }
-
-  // Main background task handler
-  @pragma('vm:entry-point')
-  static void onStart(ServiceInstance service) async {
-    // Ensure Flutter bindings are initialized
-    WidgetsFlutterBinding.ensureInitialized();
-    DartPluginRegistrant.ensureInitialized();
-    
-    // Log that service is starting
-    print('Background service starting: ${DateTime.now()}');
-    
-    // Access the AlarmVM singleton
-    final alarmVM = AlarmVM();
-    
-    // Initial notification setup for Android
-    if (service is AndroidServiceInstance) {
-      // Set foreground notification info
-      service.setForegroundNotificationInfo(
-        title: "Alarm Manager",
-        content: "Service running in background",
-      );
-    }
-
-    // Handle notification events from the app
-    service.on('showNotification').listen((event) {
-      if (service is AndroidServiceInstance) {
-        service.setForegroundNotificationInfo(
-          title: event?['title'] ?? 'Alarm',
-          content: event?['content'] ?? 'Your alarm is ringing',
-        );
-      }
-    });
-
-    // Configure periodic task - check alarms every 15 minutes
-    Timer.periodic(const Duration(minutes: 15), (timer) async {
-      print('Checking alarms at ${DateTime.now()}');
-      
-      if (service is AndroidServiceInstance) {
-        service.setForegroundNotificationInfo(
-          title: "Alarm Manager",
-          content: "Checking alarms at ${DateTime.now()}",
-        );
-      }
-      
-      // Check for alarms that need to be triggered
-      await alarmVM.checkAlarms();
-      
-      // Send any updates to the app
-      service.invoke('update', {
-        'last_check': DateTime.now().toIso8601String(),
-      });
-    });
-    
-    // Also perform an immediate check when service starts
-    await alarmVM.checkAlarms();
-    
-    print('Background service started successfully');
-  }
-
   Future<void> _loadAlarms() async {
     try {
       final directory = await getApplicationDocumentsDirectory();
@@ -190,43 +117,45 @@ class AlarmVM with ChangeNotifier {
     }
   }
 
-/// Vérification des alarmes pour le timer
-Future<void> checkAlarms() async {
-  print('Checking alarms...');
-  bool wasAlarmModified = false;
+  /// Nouvelle méthode de vérification des alarmes pour le Timer
+  Future<void> checkAlarms() async {
+    print('Checking alarms...');
+    bool wasAlarmModified = false;
 
-  DateTime now = DateTime.now();
-  print('Current time: $now');
+    DateTime now = DateTime.now();
+    print('Current time: $now');
 
-  for (Alarm alarm in alarms) {
-    print('Checking alarm: ${alarm.name}, next time: ${alarm.nextAlarmTime}');
-    if (alarm.nextAlarmTime.isBefore(now)) {
-      print('Alarm triggered: ${alarm.name}');
-      
-      try {
-        await audioPlayerVM.playFromAssets(alarm);
-        print('Audio played successfully');
-      } catch (e) {
-        print('Error playing audio: $e');
+    for (Alarm alarm in alarms) {
+      print('Checking alarm: ${alarm.name}, next time: ${alarm.nextAlarmTime}');
+      if (alarm.nextAlarmTime.isBefore(now)) {
+        print('Alarm triggered: ${alarm.name}');
+
+        try {
+          await audioPlayerVM.playFromAssets(alarm);
+          print('Audio played successfully');
+        } catch (e) {
+          print('Error playing audio: $e');
+        }
+
+        // Update the nextAlarmTime
+        updateAlarmDateTimes(
+          alarm: alarm,
+        );
+        wasAlarmModified = true;
+        print(
+            'Alarm updated: ${alarm.name}, new next time: ${alarm.nextAlarmTime}');
       }
+    }
 
-      // Update the nextAlarmTime
-      updateAlarmDateTimes(
-        alarm: alarm,
-      );
-      wasAlarmModified = true;
-      print('Alarm updated: ${alarm.name}, new next time: ${alarm.nextAlarmTime}');
+    if (wasAlarmModified) {
+      await _saveAlarms();
+      notifyListeners();
+      print('Alarms saved after modifications');
+    } else {
+      print('No alarms needed updates');
     }
   }
 
-  if (wasAlarmModified) {
-    await _saveAlarms();
-    notifyListeners();
-    print('Alarms saved after modifications');
-  } else {
-    print('No alarms needed updates');
-  }
-}
   void updateAlarmDateTimes({
     required Alarm alarm,
   }) {

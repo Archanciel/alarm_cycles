@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
 
 import '../constant.dart';
 import '../models/alarm.dart';
@@ -59,22 +58,22 @@ class _AlarmPageState extends State<AlarmPage> with ScreenMixin {
 
     PermissionRequesterService.requestMultiplePermissions();
 
-    _initBackgroundService();
+    // _initBackgroundService();
   }
 
-  Future<void> _initBackgroundService() async {
-    // Récupérer l'instance du service
-    final service = FlutterBackgroundService();
+  // Future<void> _initBackgroundService() async {
+  //   // Récupérer l'instance du service
+  //   final service = FlutterBackgroundService();
     
-    // Vérifier si le service est en cours d'exécution
-    bool isRunning = await service.isRunning();
+  //   // Vérifier si le service est en cours d'exécution
+  //   bool isRunning = await service.isRunning();
     
-    // Si le service n'est pas en cours d'exécution, le démarrer
-    if (!isRunning) {
-      // Le service est configuré dans main.dart
-      service.startService();
-    }
-  }
+  //   // Si le service n'est pas en cours d'exécution, le démarrer
+  //   if (!isRunning) {
+  //     // Le service est configuré dans main.dart
+  //     service.startService();
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

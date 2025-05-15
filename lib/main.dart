@@ -33,6 +33,12 @@ Future<void> main() async {
 
 // Démarre un timer pour vérifier périodiquement les alarmes
 void _startAlarmCheckTimer() {
+  print("Starting alarm check timer");
+  
+  // Premier contrôle immédiat
+  AlarmVM().checkAlarms();
+  
+  // Puis toutes les minutes
   Timer.periodic(const Duration(minutes: 1), (timer) {
     print("Checking alarms at ${DateTime.now()}");
     AlarmVM().checkAlarms();

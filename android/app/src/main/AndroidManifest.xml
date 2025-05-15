@@ -38,12 +38,12 @@
             android:stopWithTask="false"/> -->
 
         <!-- Spécifiez le type de service en premier plan avec tools:replace pour résoudre le conflit -->
-        <service
+    <!-- <service
             android:name="id.flutter.flutter_background_service.BackgroundService"
             android:foregroundServiceType="mediaPlayback"
             android:enabled="true"
             android:exported="false"
-            tools:replace="android:exported" />
+            tools:replace="android:exported" /> -->
 
         </application>
     <!-- Required to query activities that can process text, see:

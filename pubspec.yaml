@@ -23,9 +23,6 @@ dependencies:
   permission_handler: ^12.0.0+1
   file_picker: ^10.1.9 # newer version was INFECT (till 10.1.2 !). Version 9.2.2 works !
   archive: ^4.0.2
-  flutter_background_service: ^5.1.0
-  flutter_background_service_android: ^6.3.0
-  flutter_background_service_ios: ^5.0.3
 
 dev_dependencies:
   flutter_test:
