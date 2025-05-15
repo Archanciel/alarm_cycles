@@ -19,9 +19,9 @@ void onStart(ServiceInstance service) {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  
   PermissionRequesterService.requestMultiplePermissions();
-
+  
   // Initialiser le service en arrière-plan
   await initializeService();
 
@@ -31,7 +31,7 @@ Future<void> main() async {
       isTest: false,
     );
   }
-
+  
   runApp(ChangeNotifierProvider(
     create: (context) => AlarmVM(),
     child: const MyApp(),
@@ -59,7 +59,7 @@ Future<void> initializeService() async {
       onBackground: AlarmVM.onIosBackground,
     ),
   );
-
+  
   // Démarrer le service
   service.startService();
 }
@@ -71,18 +71,14 @@ Future<void> _setWindowsAppSizeAndPosition({
 }) async {
   if (ScreenMixin.isHardwarePc()) {
     await getScreenList().then((List<Screen> screens) {
-      // Assumez que vous voulez utiliser le premier écran (principal)
       final Screen screen = screens.first;
       final Rect screenRect = screen.visibleFrame;
-      // Définissez la largeur et la hauteur de votre fenêtre
       double windowWidth = (isTest) ? 900 : 730;
       double windowHeight = (isTest) ? 1700 : 1480;
-      // Calculez la position X pour placer la fenêtre sur le côté droit de l'écran
       final double posX = screenRect.right - windowWidth + 10;
-      // Optionnellement, ajustez la position Y selon vos préférences
       final double posY = (screenRect.height - windowHeight) / 2;
       final Rect windowRect =
-      Rect.fromLTWH(posX, posY, windowWidth, windowHeight);
+          Rect.fromLTWH(posX, posY, windowWidth, windowHeight);
       setWindowFrame(windowRect);
     });
   }
@@ -92,7 +88,7 @@ class MyApp extends StatelessWidget {
   const MyApp({
     super.key,
   });
-
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
