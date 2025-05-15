@@ -3,15 +3,12 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:alarm_cycle/constant.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../models/alarm.dart';
-import '../views/simple_edit_alarm_screen.dart';
 
 class AudioPlayerVM extends ChangeNotifier {
   /// Play an audio file located in the assets folder.
@@ -193,52 +190,43 @@ class AlarmVM with ChangeNotifier {
     }
   }
 
-  /// Replacement for the checkAlarmsPeriodically method
-  /// This is now called by the background service timer
-  Future<void> checkAlarms() async {
-    print('Checking alarms...');
-    bool wasAlarmModified = false;
+/// Vérification des alarmes pour le timer
+Future<void> checkAlarms() async {
+  print('Checking alarms...');
+  bool wasAlarmModified = false;
 
-    DateTime now = DateTime.now();
-    print('Current time: $now');
+  DateTime now = DateTime.now();
+  print('Current time: $now');
 
-    for (Alarm alarm in alarms) {
-      print('Checking alarm: ${alarm.name}, next time: ${alarm.nextAlarmTime}');
-      if (alarm.nextAlarmTime.isBefore(now)) {
-        print('Alarm triggered: ${alarm.name}');
-        
-        // Show notification using the background service
-        final service = FlutterBackgroundService();
-        service.invoke('showNotification', {
-          'title': 'Alarm: ${alarm.name}',
-          'content': 'Time to take your medication',
-        });
-        
-        try {
-          await audioPlayerVM.playFromAssets(alarm);
-          print('Audio played successfully');
-        } catch (e) {
-          print('Error playing audio: $e');
-        }
-
-        // Update the nextAlarmTime
-        updateAlarmDateTimes(
-          alarm: alarm,
-        );
-        wasAlarmModified = true;
-        print('Alarm updated: ${alarm.name}, new next time: ${alarm.nextAlarmTime}');
+  for (Alarm alarm in alarms) {
+    print('Checking alarm: ${alarm.name}, next time: ${alarm.nextAlarmTime}');
+    if (alarm.nextAlarmTime.isBefore(now)) {
+      print('Alarm triggered: ${alarm.name}');
+      
+      try {
+        await audioPlayerVM.playFromAssets(alarm);
+        print('Audio played successfully');
+      } catch (e) {
+        print('Error playing audio: $e');
       }
-    }
 
-    if (wasAlarmModified) {
-      await _saveAlarms();
-      notifyListeners();
-      print('Alarms saved after modifications');
-    } else {
-      print('No alarms needed updates');
+      // Update the nextAlarmTime
+      updateAlarmDateTimes(
+        alarm: alarm,
+      );
+      wasAlarmModified = true;
+      print('Alarm updated: ${alarm.name}, new next time: ${alarm.nextAlarmTime}');
     }
   }
 
+  if (wasAlarmModified) {
+    await _saveAlarms();
+    notifyListeners();
+    print('Alarms saved after modifications');
+  } else {
+    print('No alarms needed updates');
+  }
+}
   void updateAlarmDateTimes({
     required Alarm alarm,
   }) {

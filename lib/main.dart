@@ -6,91 +6,37 @@ import 'package:alarm_cycle/views/screen_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_size/window_size.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
 import 'viewmodels/alarm_vm.dart';
 import 'views/alarm_page.dart';
 
-// Pour s'assurer que le service d'arrière-plan est initialisé correctement
-@pragma('vm:entry-point')
-void onStart(ServiceInstance service) {
-  // Appeler la méthode statique dans AlarmVM
-  AlarmVM.onStart(service);
-}
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  
+  // Demander les permissions
   PermissionRequesterService.requestMultiplePermissions();
-
-  // Initialiser le service en arrière-plan
-  await initializeService();
-
+  
   // Configuration des fenêtres pour les plateformes desktop
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await _setWindowsAppSizeAndPosition(
       isTest: false,
     );
   }
-
+  
+  // Créer un timer qui vérifie périodiquement les alarmes (au lieu d'un service en arrière-plan)
+  _startAlarmCheckTimer();
+  
   runApp(ChangeNotifierProvider(
     create: (context) => AlarmVM(),
     child: const MyApp(),
   ));
 }
 
-// Initialisation du service en arrière-plan déplacée ici pour plus de clarté
-Future<void> initializeService() async {
-  final service = FlutterBackgroundService();
-
-  // Créer un canal de notification
-  // Cette partie est importante pour Android 8.0+
-  if (Platform.isAndroid) {
-    try {
-      // S'assurer que le canal est créé avant de lancer le service
-      final AndroidServiceInstance androidService = await service.configure(
-        androidConfiguration: AndroidConfiguration(
-          onStart: onStart,
-          autoStart: true,
-          isForegroundMode: true,
-          notificationChannelId:
-              'alarm_cycles_channel', // ID unique pour le canal
-          initialNotificationTitle: 'Alarm Service',
-          initialNotificationContent: 'Service is running',
-          foregroundServiceNotificationId: 888,
-        ),
-        iosConfiguration: IosConfiguration(
-          autoStart: true,
-          onForeground: onStart,
-          onBackground: AlarmVM.onIosBackground,
-        ),
-      ) as AndroidServiceInstance;
-
-      print("Service configured successfully");
-    } catch (e) {
-      print("Error configuring service: $e");
-    }
-  } else {
-    // Configuration pour iOS ou autres plateformes
-    await service.configure(
-      androidConfiguration: AndroidConfiguration(
-        onStart: onStart,
-        autoStart: true,
-        isForegroundMode: true,
-        notificationChannelId: 'alarm_cycles_channel',
-        initialNotificationTitle: 'Alarm Service',
-        initialNotificationContent: 'Service is running',
-        foregroundServiceNotificationId: 888,
-      ),
-      iosConfiguration: IosConfiguration(
-        autoStart: true,
-        onForeground: onStart,
-        onBackground: AlarmVM.onIosBackground,
-      ),
-    );
-  }
-
-  // Démarrer le service
-  service.startService();
+// Démarre un timer pour vérifier périodiquement les alarmes
+void _startAlarmCheckTimer() {
+  Timer.periodic(const Duration(minutes: 1), (timer) {
+    print("Checking alarms at ${DateTime.now()}");
+    AlarmVM().checkAlarms();
+  });
 }
 
 /// If app runs on Windows, Linux or MacOS, set the app size
@@ -117,12 +63,16 @@ class MyApp extends StatelessWidget {
   const MyApp({
     super.key,
   });
-
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Alarm App',
       navigatorKey: navigatorKey,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
       home: const AlarmPage(),
     );
   }
